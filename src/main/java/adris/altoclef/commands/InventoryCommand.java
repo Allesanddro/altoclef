@@ -20,6 +20,11 @@ public class InventoryCommand extends Command {
 
     @Override
     protected void call(AltoClef mod, ArgParser parser) throws CommandException {
+        // FIX: Check if player is null (happens during startup/initialization)
+        if (mod.getPlayer() == null) {
+            return;
+        }
+
         String item = parser.get(String.class);
         if (item == null) {
             // Print inventory

@@ -388,7 +388,9 @@ public class MobDefenseChain extends SingleTaskChain {
         List<Entity> entities = mod.getEntityTracker().getCloseEntities();
         try {
             if (!entities.isEmpty()) {
-                for (Entity entity : entities) {
+                // FIXED: ConcurrentModificationException caused by modifying the list while iterating.
+                // Wrapped in new ArrayList<>(...) to create a snapshot for safe iteration.
+                for (Entity entity : new ArrayList<>(entities)) {
                     boolean shouldForce = false;
                     if (mod.getBehaviour().shouldExcludeFromForcefield(entity)) continue;
                     if (entity instanceof MobEntity) {
