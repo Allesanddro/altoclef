@@ -229,6 +229,29 @@ public class SmeltInSmokerTask extends ResourceTask {
             ItemStack material = StorageHelper.getItemStackInSlot(SmokerSlot.INPUT_SLOT_MATERIALS);
             ItemStack fuel = StorageHelper.getItemStackInSlot(SmokerSlot.INPUT_SLOT_FUEL);
 
+            // FIX: Check OUTPUT FIRST!
+            if (!output.isEmpty()) {
+                setDebugState("Receiving Output");
+                // Ensure our cursor is empty/can receive our item
+                ItemStack cursor = StorageHelper.getItemStackInCursorSlot();
+                if (!ItemHelper.canStackTogether(output, cursor)) {
+                    Optional<Slot> toFit = mod.getItemStorage().getSlotThatCanFitInPlayerInventory(cursor, false);
+                    if (toFit.isPresent()) {
+                        mod.getSlotHandler().clickSlot(toFit.get(), 0, SlotActionType.PICKUP);
+                        return null;
+                    } else {
+                        // Eh screw it
+                        if (ItemHelper.canThrowAwayStack(mod, cursor)) {
+                            mod.getSlotHandler().clickSlot(Slot.UNDEFINED, 0, SlotActionType.PICKUP);
+                            return null;
+                        }
+                    }
+                }
+                // Pick up
+                mod.getSlotHandler().clickSlot(SmokerSlot.OUTPUT_SLOT, 0, SlotActionType.PICKUP);
+                return null;
+            }
+
             // Receive from output if present
             double currentlyCachedWhileCooking = StorageHelper.getSmokerFuel() + StorageHelper.getSmokerCookPercent();
             double needsWhileCooking = material.getCount() - currentlyCachedWhileCooking;
@@ -251,28 +274,6 @@ public class SmeltInSmokerTask extends ResourceTask {
                     mod.getSlotHandler().clickSlot(SmokerSlot.INPUT_SLOT_FUEL, 0, SlotActionType.PICKUP);
                     return null;
                 }
-            }
-            if (!output.isEmpty()) {
-                setDebugState("Receiving Output");
-                // Ensure our cursor is empty/can receive our item
-                ItemStack cursor = StorageHelper.getItemStackInCursorSlot();
-                if (!ItemHelper.canStackTogether(output, cursor)) {
-                    Optional<Slot> toFit = mod.getItemStorage().getSlotThatCanFitInPlayerInventory(cursor, false);
-                    if (toFit.isPresent()) {
-                        mod.getSlotHandler().clickSlot(toFit.get(), 0, SlotActionType.PICKUP);
-                        return null;
-                    } else {
-                        // Eh screw it
-                        if (ItemHelper.canThrowAwayStack(mod, cursor)) {
-                            mod.getSlotHandler().clickSlot(Slot.UNDEFINED, 0, SlotActionType.PICKUP);
-                            return null;
-                        }
-                    }
-                }
-                // Pick up
-                mod.getSlotHandler().clickSlot(SmokerSlot.OUTPUT_SLOT, 0, SlotActionType.PICKUP);
-                return null;
-                // return new MoveItemToSlotTask(new ItemTarget(output.getItem(), output.getCount()), toMoveTo.get(), mod -> FurnaceSlot.OUTPUT_SLOT);
             }
 
             // Fill in input if needed
