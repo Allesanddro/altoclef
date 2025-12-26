@@ -3,6 +3,7 @@ package adris.altoclef.tasks;
 import adris.altoclef.AltoClef;
 import adris.altoclef.tasks.resources.CollectRecipeCataloguedResourcesTask;
 import adris.altoclef.tasks.slot.ReceiveCraftingOutputSlotTask;
+import adris.altoclef.tasksystem.ITaskUsesCraftingGrid;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.RecipeTarget;
@@ -20,7 +21,7 @@ import java.util.Optional;
 /**
  * Crafts an item within the 2x2 inventory crafting grid.
  */
-public class CraftInInventoryTask extends ResourceTask {
+public class CraftInInventoryTask extends ResourceTask implements ITaskUsesCraftingGrid {
 
     private final RecipeTarget _target;
     private final boolean _collect;
@@ -91,13 +92,18 @@ public class CraftInInventoryTask extends ResourceTask {
         // No need to free inventory, output gets picked up.
 
         setDebugState("Crafting in inventory... for " + toGet);
-        return mod.getModSettings().shouldUseCraftingBookToCraft()
-                ? new CraftGenericWithRecipeBooksTask(_target)
-                : new CraftGenericManuallyTask(_target);
+        
+        // FORCED: Manual crafting for 1.21.8 stability
+        return new CraftGenericManuallyTask(_target);
     }
 
     @Override
     protected void onResourceStop(AltoClef mod, Task interruptTask) {
+        // Prevent clearing the grid if the next task also uses it
+        if (interruptTask instanceof ITaskUsesCraftingGrid) {
+            return;
+        }
+
         ItemStack cursorStack = StorageHelper.getItemStackInCursorSlot();
         if (!cursorStack.isEmpty()) {
             List<Slot> moveTo = mod.getItemStorage().getSlotsThatCanFitInPlayerInventory(cursorStack, false);

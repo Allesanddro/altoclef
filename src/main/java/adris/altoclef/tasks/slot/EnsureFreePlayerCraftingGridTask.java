@@ -1,6 +1,7 @@
 package adris.altoclef.tasks.slot;
 
 import adris.altoclef.AltoClef;
+import adris.altoclef.tasksystem.ITaskUsesCraftingGrid;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.slots.PlayerSlot;
@@ -8,7 +9,7 @@ import adris.altoclef.util.slots.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class EnsureFreePlayerCraftingGridTask extends Task {
+public class EnsureFreePlayerCraftingGridTask extends Task implements ITaskUsesCraftingGrid {
     @Override
     protected void onStart(AltoClef mod) {
 
